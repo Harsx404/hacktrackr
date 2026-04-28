@@ -1,0 +1,38 @@
+{
+  "name": "srm-login",
+  "version": "1.0.0",
+  "description": "SRM Academia login automation",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --env-file=.env server.js",
+    "api": "node --env-file=.env server.js",
+    "faculty": "faculty-scraper\\\\faculty-scraper.exe",
+    "server": "node --env-file=.env server.js",
+    "test": "node --test tests/unit",
+    "test:unit": "node --test tests/unit",
+    "test:integration": "node --test tests/integration/api.test.js",
+    "test:frontend": "cd srm-frontend && npm test",
+    "test:pw": "node --env-file=.env scripts/test_login.js",
+    "test:data": "node --env-file=.env scripts/test_data.js",
+    "inspect:attendance": "node --env-file=.env scripts/inspect_attendance_network.js",
+    "inspect:block-sessions": "node --env-file=.env scripts/inspect_block_sessions.js",
+    "dump:fragments": "node --env-file=.env scripts/dump_portal_fragments.js",
+    "test:attendance-fast": "node --env-file=.env scripts/test_attendance_fast.js",
+    "test:attendance-go": "node --env-file=.env scripts/test_attendance_go.js",
+    "test:login-go": "node --env-file=.env scripts/test_go_login.js",
+    "test:login-go-all": "node --env-file=.env --input-type=module -e \"process.env.GO_FETCH_ALL='1'; await import('./scripts/test_go_login.js');\"",
+    "test:login-cycles": "node --env-file=.env scripts/test_login_cycles.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "axios-cookiejar-support": "^4.0.7",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "tough-cookie": "^4.1.3"
+  }
+}

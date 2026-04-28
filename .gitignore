@@ -31,7 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
 .env*.local
+academia-backend/.env
+academia-backend/.gocache/
 
 # typescript
 *.tsbuildinfo
@@ -39,3 +43,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Go compiled binaries
+academia-backend/academia-scraper/*.exe
+academia-backend/academia-scraper/academia-scraper
+academia-backend/academia-scraper/loginprobe
+academia-backend/faculty-scraper/*.exe
