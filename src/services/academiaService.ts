@@ -171,11 +171,13 @@ function getExpoHost() {
 }
 
 function defaultAcademiaApiUrl() {
+  // In dev (Expo Go), use the host machine's LAN IP auto-detected from Expo
   const host = getExpoHost();
   if (host && !['localhost', '127.0.0.1', '::1'].includes(host)) {
     return `http://${host}:3000`;
   }
-  return 'http://localhost:3000';
+  // Production fallback — Railway deployment
+  return 'https://hacktrackr-production.up.railway.app';
 }
 
 const BASE_URL = (process.env.EXPO_PUBLIC_ACADEMIA_API_URL || defaultAcademiaApiUrl()).replace(/\/+$/, '');
@@ -195,7 +197,7 @@ async function request<T extends AcademiaBaseResponse>(method: string, path: str
     });
   } catch {
     throw new Error(
-      `Cannot reach AcademiaMine backend at ${BASE_URL}. Set EXPO_PUBLIC_ACADEMIA_API_URL to your computer LAN URL, for example http://192.168.1.10:3000.`,
+      `Cannot reach Academia backend at ${BASE_URL}. Check your internet connection and try again.`,
     );
   }
 
