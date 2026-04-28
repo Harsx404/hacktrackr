@@ -13,6 +13,11 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://zoqphzytsoguculpahmi.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_h18eEI_mKZNyVPM6csH5uw_qaD1sMn6",
+        "EXPO_PUBLIC_ACADEMIA_API_URL": "https://hacktrackr-production.up.railway.app"
+      },
       "android": {
         "buildType": "apk"
       },
