@@ -1,17 +1,12 @@
 /**
- * AI Service — Ollama backend (gemma3)
+ * AI Service — proxied through academia-backend (/ai/chat)
  *
- * Uses Ollama's /api/chat endpoint with format:"json" to force structured output.
- * Ollama must be running on the same network as the device.
- * Configure EXPO_PUBLIC_OLLAMA_URL and EXPO_PUBLIC_OLLAMA_MODEL in .env
+ * The Ollama cloud API key lives on the server only (never in the app bundle).
+ * Set EXPO_PUBLIC_ACADEMIA_API_URL to point to your deployed backend.
  */
 
-const OLLAMA_URL =
-  process.env.EXPO_PUBLIC_OLLAMA_URL || 'http://localhost:11434';
-const OLLAMA_MODEL =
-  process.env.EXPO_PUBLIC_OLLAMA_MODEL || 'gemma4:31b-cloud';
-const OLLAMA_API_KEY =
-  process.env.EXPO_PUBLIC_OLLAMA_API_KEY || '';
+const BACKEND_URL =
+  (process.env.EXPO_PUBLIC_ACADEMIA_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 export interface ParsedHackathonData {
   name: string;
@@ -47,46 +42,24 @@ Use this exact structure:
  * Falls back gracefully with a clear error message on network/parse failure.
  */
 export async function parseHackathonDetails(rawText: string): Promise<ParsedHackathonData> {
-  const body = {
-    model: OLLAMA_MODEL,
-    stream: false,
-    format: 'json',
-    options: {
-      temperature: 0.1,
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    {
+      role: 'user',
+      content: `Extract all hackathon metadata from the following text and return ONLY the JSON object:\n\n${rawText}`,
     },
-    messages: [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT,
-      },
-      {
-        role: 'user',
-        content: `Extract all hackathon metadata from the following text and return ONLY the JSON object:\n\n${rawText}`,
-      },
-    ],
-  };
+  ];
 
   let response: Response;
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (OLLAMA_API_KEY) {
-      headers['Authorization'] = `Bearer ${OLLAMA_API_KEY}`;
-    }
-
-    // Cloud base is https://ollama.com/api — endpoint is /chat
-    // Local base is http://host:11434   — endpoint is /api/chat
-    const endpoint = OLLAMA_URL.endsWith('/api')
-      ? `${OLLAMA_URL}/chat`
-      : `${OLLAMA_URL}/api/chat`;
-
-    response = await fetch(endpoint, {
+    response = await fetch(`${BACKEND_URL}/ai/chat`, {
       method: 'POST',
-      headers,
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, format: 'json' }),
     });
   } catch (networkError: any) {
     throw new Error(
-      `Cannot reach Ollama at ${OLLAMA_URL}.\n\nMake sure:\n• Ollama is running: ollama serve\n• The model is pulled: ollama pull ${OLLAMA_MODEL}\n• Your device and PC are on the same network`
+      `Cannot reach AI service at ${BACKEND_URL}.\n\nMake sure the backend is running.`
     );
   }
 

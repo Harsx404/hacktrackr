@@ -1589,6 +1589,51 @@ app.get("/faculty", async (req, res) => {
   }
 });
 
+// ─── AI Proxy ─────────────────────────────────────────────────────────────────
+// Forwards chat requests to the configured Ollama cloud endpoint.
+// The API key lives server-side only — never exposed to the app bundle.
+
+const OLLAMA_URL   = (process.env.OLLAMA_URL   || "https://ollama.com/api").replace(/\/$/, "");
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL  || "gemma4:31b-cloud";
+const OLLAMA_KEY   = process.env.OLLAMA_API_KEY || "";
+
+app.post("/ai/chat", express.json({ limit: "64kb" }), async (req, res) => {
+  try {
+    const { messages, format } = req.body || {};
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "messages array required" });
+    }
+
+    const endpoint = OLLAMA_URL.endsWith("/api")
+      ? `${OLLAMA_URL}/chat`
+      : `${OLLAMA_URL}/api/chat`;
+
+    const headers = { "Content-Type": "application/json" };
+    if (OLLAMA_KEY) headers["Authorization"] = `Bearer ${OLLAMA_KEY}`;
+
+    const upstream = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        stream: false,
+        format: format || "json",
+        options: { temperature: 0.1 },
+        messages,
+      }),
+    });
+
+    const data = await upstream.json();
+    if (!upstream.ok) {
+      return res.status(502).json({ error: data?.error || `Upstream returned ${upstream.status}` });
+    }
+    return res.json(data);
+  } catch (err) {
+    log("AI", `Proxy error: ${err.message}`);
+    return res.status(502).json({ error: "AI service unreachable" });
+  }
+});
+
 // ─── Startup ──────────────────────────────────────────────────────────────────
 
 function start() {
