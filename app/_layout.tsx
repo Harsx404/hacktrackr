@@ -10,6 +10,7 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Linking from 'expo-linking';
 import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
@@ -77,6 +78,19 @@ function RootLayoutNav() {
   useEffect(() => {
     let mounted = true;
 
+    // Handle email verification deep link: hacktrackr://...?access_token=...
+    async function handleDeepLink(url: string) {
+      const parsed = Linking.parse(url);
+      const access_token = parsed.queryParams?.access_token as string | undefined;
+      const refresh_token = parsed.queryParams?.refresh_token as string | undefined;
+      if (access_token && refresh_token) {
+        await supabase.auth.setSession({ access_token, refresh_token });
+      }
+    }
+
+    Linking.getInitialURL().then((url) => { if (url) handleDeepLink(url); });
+    const linkSub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
+
     async function syncAcademiaPrompt(nextSession: Session | null) {
       try {
         const userId = nextSession?.user?.id;
@@ -137,6 +151,7 @@ function RootLayoutNav() {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      linkSub.remove();
     };
   }, []);
 

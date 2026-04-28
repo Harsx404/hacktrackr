@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View } from '@/components/Themed';
 import { colors, typography } from '../src/theme';
 import { supabase } from '../src/utils/supabase';
+import * as Linking from 'expo-linking';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -42,7 +43,8 @@ export default function AuthScreen() {
       options: {
         data: {
           full_name: name,
-        }
+        },
+        emailRedirectTo: Linking.createURL('/'),
       }
     });
 

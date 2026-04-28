@@ -24,7 +24,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.hacktrackr.app"
+      "package": "com.hacktrackr.app",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
