@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: hackathon-backend
+    runtime: node
+    rootDir: hackathon-backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OLLAMA_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+
+  - type: web
+    name: academia-backend
+    runtime: docker
+    rootDir: academia-backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: SCRAPER_URL
+        value: http://localhost:8080
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: OLLAMA_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
