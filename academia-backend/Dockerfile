@@ -1,16 +1,20 @@
-# ── Stage 1: Build Go scraper binary for Linux ───────────────────────────────
+# ── Stage 1: Build Go binaries for Linux ─────────────────────────────────────
 FROM golang:1.24-alpine AS go-builder
 
-WORKDIR /build
+# Build academia scraper (loginprobe)
+WORKDIR /build/academia
 COPY academia-scraper/ .
-
 RUN go build -o loginprobe ./cmd/loginprobe
+
+# Build faculty scraper HTTP server
+WORKDIR /build/faculty
+COPY faculty-scraper/ .
+RUN go build -o faculty-scraper .
 
 # ── Stage 2: Node.js production image ────────────────────────────────────────
 FROM node:20-alpine
 
-# Chromium/headless deps are NOT needed — Go scraper handles all HTTP natively.
-# Install ca-certificates so Go binary can validate TLS.
+# Install ca-certificates so Go binaries can validate TLS.
 RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
@@ -23,12 +27,16 @@ RUN npm ci --omit=dev
 COPY server.js .
 COPY backend/ ./backend/
 
-# Place compiled Go binary where go_scraper_client.js expects it
-COPY --from=go-builder /build/loginprobe ./academia-scraper/loginprobe
-RUN chmod +x ./academia-scraper/loginprobe
+# Place compiled Go binaries
+COPY --from=go-builder /build/academia/loginprobe ./academia-scraper/loginprobe
+COPY --from=go-builder /build/faculty/faculty-scraper ./faculty-scraper-bin
+RUN chmod +x ./academia-scraper/loginprobe ./faculty-scraper-bin
 
-# Port exposed by the Express server (Railway sets $PORT automatically)
+# Start script runs both processes
+COPY start.sh .
+RUN chmod +x start.sh
+
+# $PORT is injected by Render at runtime
 EXPOSE 3000
 
-# Run without --env-file; Railway injects env vars directly
-CMD ["node", "server.js"]
+CMD ["./start.sh"]

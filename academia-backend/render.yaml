@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: academia-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: SCRAPER_URL
+        value: http://localhost:8080
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        sync: false   # set this in Render dashboard (comma-separated frontend URLs)
+      - key: OLLAMA_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
