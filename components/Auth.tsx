@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, View } from '@/components/Themed';
 import { colors, typography } from '../src/theme';
 import { supabase } from '../src/utils/supabase';
 import * as Linking from 'expo-linking';
-import { openAuthSessionAsync } from 'expo-web-browser';
+import { openAuthSessionAsync, maybeCompleteAuthSession } from 'expo-web-browser';
+
+// Required: completes auth session on redirect back
+maybeCompleteAuthSession();
+
+// Always use the native app scheme — never localhost
+const GOOGLE_REDIRECT = 'hacktrackr://auth/callback';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -55,12 +61,10 @@ export default function AuthScreen() {
   async function signInWithGoogle() {
     setLoading(true);
     try {
-      const redirectUrl = Linking.createURL('/auth/callback');
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: GOOGLE_REDIRECT,
           skipBrowserRedirect: true,
         },
       });
@@ -68,7 +72,7 @@ export default function AuthScreen() {
       if (error) throw error;
       if (!data.url) throw new Error('No OAuth URL returned');
 
-      const result = await openAuthSessionAsync(data.url, redirectUrl);
+      const result = await openAuthSessionAsync(data.url, GOOGLE_REDIRECT);
 
       if (result.type === 'success') {
         // Supabase returns tokens in the URL hash fragment
