@@ -176,11 +176,11 @@ function defaultAcademiaApiUrl() {
   if (host && !['localhost', '127.0.0.1', '::1'].includes(host)) {
     return `http://${host}:3000`;
   }
-  // Production fallback — Railway deployment
-  return 'https://hacktrackr-production.up.railway.app';
+  // Production fallback — Render deployment
+  return 'https://academia-backend-8q9r.onrender.com';
 }
 
-const BASE_URL = (process.env.EXPO_PUBLIC_ACADEMIA_API_URL || defaultAcademiaApiUrl()).replace(/\/+$/, '');
+const BASE_URL = (process.env.EXPO_PUBLIC_BACKEND_URL || defaultAcademiaApiUrl()).replace(/\/+$/, '');
 
 export function academiaApiUrl(path: string) {
   return `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;

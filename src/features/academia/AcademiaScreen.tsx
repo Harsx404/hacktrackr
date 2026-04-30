@@ -595,8 +595,8 @@ function ScheduleView({
   return (
     <View style={styles.tabContent}>
       <View style={styles.scheduleHero}>
-        <View>
-          <Text style={styles.scheduleTitle}>{headerTitle}</Text>
+        <View style={{ flex: 1, paddingRight: 16 }}>
+          <Text style={styles.scheduleTitle} numberOfLines={1} adjustsFontSizeToFit>{headerTitle}</Text>
           <Text style={styles.scheduleDate}>
             {data.dayOfWeek}, {data.date} {data.monthName}
           </Text>
@@ -659,48 +659,50 @@ function ScheduleView({
             const optionalKey = `${data.dayOrder}-${item.courseCode}-${item.hourIndex}`;
             const isOptional = !!optionalClasses[optionalKey];
             const photo = proxiedFacultyPhoto(item.facultyPhotoUrl);
+            const cardColors = [colors.accentYellow, colors.accentBlue, colors.accentWhite];
+            const bgColor = cardColors[index % cardColors.length];
 
             return (
-              <View key={`${item.courseCode}-${item.timing}-${index}`} style={[styles.classCard, isOptional && styles.classCardOptional]}>
+              <View key={`${item.courseCode}-${item.timing}-${index}`} style={[styles.classCard, { backgroundColor: bgColor, borderColor: 'transparent' }, isOptional && styles.classCardOptional]}>
                 <View style={styles.classTopRow}>
-                  <View style={styles.smallAvatar}>
+                  <View style={[styles.smallAvatar, { backgroundColor: 'rgba(0,0,0,0.1)' }]}>
                     {photo ? (
                       <Image source={{ uri: photo }} style={styles.smallAvatarImage} />
                     ) : (
-                      <Text style={styles.smallAvatarFallback}>{item.courseTitle.charAt(0)}</Text>
+                      <Text style={[styles.smallAvatarFallback, { color: colors.background }]}>{item.courseTitle.charAt(0)}</Text>
                     )}
                   </View>
                   <View style={styles.classTitleBlock}>
-                    <Text style={[styles.classTitle, isOptional && styles.optionalText]}>{item.courseTitle}</Text>
-                    <Text style={styles.classCode}>{item.courseCode}</Text>
+                    <Text style={[styles.classTitle, { color: colors.background }, isOptional && { textDecorationLine: 'line-through', color: 'rgba(0,0,0,0.4)' }]}>{item.courseTitle}</Text>
+                    <Text style={[styles.classCode, { color: 'rgba(0,0,0,0.6)' }]}>{item.courseCode}</Text>
                   </View>
                 </View>
 
                 <View style={styles.classMetaRow}>
-                  <View style={styles.classMetaItem}>
-                    <Clock color={colors.textMuted} size={15} strokeWidth={1.5} />
-                    <Text style={styles.classMetaText}>{item.timing || 'Timing TBA'}</Text>
+                  <View style={[styles.classMetaItem, { borderColor: 'rgba(0,0,0,0.1)' }]}>
+                    <Clock color="rgba(0,0,0,0.6)" size={15} strokeWidth={1.5} />
+                    <Text style={[styles.classMetaText, { color: 'rgba(0,0,0,0.6)' }]}>{item.timing || 'Timing TBA'}</Text>
                   </View>
-                  <View style={styles.classMetaItem}>
-                    <BookOpen color={colors.textMuted} size={15} strokeWidth={1.5} />
-                    <Text style={styles.classMetaText}>{item.roomNo || item.category || 'Room TBA'}</Text>
+                  <View style={[styles.classMetaItem, { borderColor: 'rgba(0,0,0,0.1)' }]}>
+                    <BookOpen color="rgba(0,0,0,0.6)" size={15} strokeWidth={1.5} />
+                    <Text style={[styles.classMetaText, { color: 'rgba(0,0,0,0.6)' }]}>{item.roomNo || item.category || 'Room TBA'}</Text>
                   </View>
                 </View>
 
                 <View style={styles.classActions}>
                   {item.facultyName ? (
                     <TouchableOpacity onPress={() => onFacultyPress(item.facultyName)} activeOpacity={0.7}>
-                      <Text style={styles.facultyLink}>{cleanFacultyName(item.facultyName)}</Text>
+                      <Text style={[styles.facultyLink, { color: colors.background }]}>{cleanFacultyName(item.facultyName)}</Text>
                     </TouchableOpacity>
                   ) : (
-                    <Text style={styles.classMetaText}>Faculty TBA</Text>
+                    <Text style={[styles.classMetaText, { color: 'rgba(0,0,0,0.6)' }]}>Faculty TBA</Text>
                   )}
                   <TouchableOpacity
-                    style={[styles.optionalButton, isOptional && styles.optionalButtonActive]}
+                    style={[styles.optionalButton, { borderColor: 'rgba(0,0,0,0.2)' }, isOptional && { backgroundColor: colors.background, borderColor: colors.background }]}
                     onPress={() => onToggleOptional(optionalKey)}
                     activeOpacity={0.75}
                   >
-                    <Text style={[styles.optionalButtonText, isOptional && styles.optionalButtonTextActive]}>
+                    <Text style={[styles.optionalButtonText, { color: isOptional ? bgColor : 'rgba(0,0,0,0.6)' }]}>
                       {isOptional ? 'Optional' : 'Required'}
                     </Text>
                   </TouchableOpacity>
@@ -1047,6 +1049,9 @@ function CoursesView({ timetable, onFacultyPress }: { timetable: TimetableData; 
   const courses = timetable.courses || [];
   const [exporting, setExporting] = useState(false);
 
+  const totalCourses = courses.length;
+  const totalCredits = courses.reduce((sum, c) => sum + (Number(c.credit) || 0), 0);
+
   const handleExport = async () => {
     if (courses.length === 0) return;
     setExporting(true);
@@ -1069,12 +1074,23 @@ function CoursesView({ timetable, onFacultyPress }: { timetable: TimetableData; 
 
   return (
     <View style={styles.tabContent}>
+      <View style={styles.metricRow}>
+        <View style={styles.metricBox}>
+          <Text style={styles.metricNumber}>{totalCourses}</Text>
+          <Text style={styles.metricLabel}>Registered</Text>
+        </View>
+        <View style={styles.metricBox}>
+          <Text style={[styles.metricNumber, { color: colors.accentYellow }]}>{totalCredits}</Text>
+          <Text style={styles.metricLabel}>Total Credits</Text>
+        </View>
+      </View>
+
       {courses.length === 0 ? (
         <EmptyState title="No courses found" />
       ) : (
         <View style={styles.listSection}>
           <View style={styles.sectionHeader}>
-            <SectionLabel>COURSE INFO</SectionLabel>
+            <SectionLabel>COURSE LISTING</SectionLabel>
             <TouchableOpacity
               style={[styles.exportButton, exporting && { opacity: 0.55 }]}
               onPress={handleExport}
@@ -1089,42 +1105,67 @@ function CoursesView({ timetable, onFacultyPress }: { timetable: TimetableData; 
           </View>
           {courses.map((course: TimetableCourse, index) => {
             const photo = proxiedFacultyPhoto(course.facultyPhotoUrl);
+            const cardColors = [colors.accentYellow, colors.accentBlue, colors.accentWhite];
+            const bgColor = cardColors[index % cardColors.length];
+            const tags = [course.category || course.courseType, course.credit ? `${course.credit} credits` : null, course.roomNo, course.slot].filter(Boolean);
+
             return (
-              <View key={`${course.courseCode}-${index}`} style={styles.courseCard}>
-                <View style={styles.classTopRow}>
-                  <View style={styles.smallAvatar}>
-                    {photo ? (
-                      <Image source={{ uri: photo }} style={styles.smallAvatarImage} />
-                    ) : (
-                      <Text style={styles.smallAvatarFallback}>{stringValue(course.courseTitle, '?').charAt(0)}</Text>
-                    )}
+              <View key={`${course.courseCode}-${index}`} style={[styles.courseCard, { backgroundColor: bgColor, borderColor: 'transparent', padding: 24, borderRadius: 24, gap: 16 }]}>
+                {/* Header Row: Course Code & Schedule */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.08)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 100 }}>
+                    <Text style={{ fontFamily: 'Inter-Medium', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, color: 'rgba(0,0,0,0.7)' }}>
+                      {course.courseCode || 'Code TBA'}
+                    </Text>
                   </View>
-                  <View style={styles.classTitleBlock}>
-                    <Text style={styles.cardTitle}>{course.courseTitle || 'Untitled course'}</Text>
-                    <Text style={styles.cardSubtitle}>{course.courseCode || 'Course code'}</Text>
-                  </View>
+                  
+                  {course.schedule?.length ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, flex: 1, justifyContent: 'flex-end', paddingLeft: 12 }}>
+                      {course.schedule.map((slot, slotIndex) => (
+                        <View key={slotIndex} style={{ backgroundColor: 'rgba(0,0,0,0.06)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                          <Text style={{ fontFamily: 'Inter-Medium', fontSize: 11, color: 'rgba(0,0,0,0.6)' }}>
+                            {slot.day?.slice(0, 3)} {slot.timing}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ) : null}
                 </View>
 
-                <View style={styles.courseMetaGrid}>
-                  <Text style={styles.courseMeta}>{course.category || course.courseType || 'Category TBA'}</Text>
-                  <Text style={styles.courseMeta}>{course.credit ? `${course.credit} credits` : 'Credits TBA'}</Text>
-                  <Text style={styles.courseMeta}>{course.roomNo || 'Room TBA'}</Text>
-                  <Text style={styles.courseMeta}>{course.slot || 'Slot TBA'}</Text>
+                {/* Title */}
+                <Text style={{ ...typography.h1, fontSize: 32, lineHeight: 36, letterSpacing: -1, color: colors.background }}>
+                  {course.courseTitle || 'Untitled Course'}
+                </Text>
+
+                {/* Meta Row: Dot-separated */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {[course.category || course.courseType, course.credit ? `${course.credit} credits` : null, course.roomNo, course.slot].filter(Boolean).map((meta, i) => (
+                    <Text key={i} style={{ fontFamily: 'Inter-Medium', fontSize: 14, color: 'rgba(0,0,0,0.6)' }}>
+                      {i > 0 ? '•  ' : ''}{meta}
+                    </Text>
+                  ))}
                 </View>
 
+                {/* Faculty Footer: Only renders if facultyName exists */}
                 {course.facultyName ? (
-                  <TouchableOpacity onPress={() => onFacultyPress(course.facultyName || '')} activeOpacity={0.7}>
-                    <Text style={styles.facultyLink}>{cleanFacultyName(course.facultyName)}</Text>
-                  </TouchableOpacity>
-                ) : null}
-
-                {course.schedule?.length ? (
-                  <View style={styles.scheduleChips}>
-                    {course.schedule.map((slot, slotIndex) => (
-                      <View key={`${slot.day}-${slot.timing}-${slotIndex}`} style={styles.scheduleChip}>
-                        <Text style={styles.scheduleChipText}>{slot.day || 'Day'} / {slot.timing || 'Timing'}</Text>
-                      </View>
-                    ))}
+                  <View style={{ marginTop: 4, borderTopWidth: 1, borderColor: 'rgba(0,0,0,0.08)', paddingTop: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.1)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      {photo ? (
+                        <Image source={{ uri: photo }} style={{ width: '100%', height: '100%' }} />
+                      ) : (
+                        <Text style={{ fontFamily: 'Inter-Medium', fontSize: 18, color: colors.background }}>
+                          {cleanFacultyName(course.facultyName).charAt(0)}
+                        </Text>
+                      )}
+                    </View>
+                    <TouchableOpacity onPress={() => onFacultyPress(course.facultyName || '')} activeOpacity={0.7} style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: 'Inter-Medium', fontSize: 16, color: colors.background }} numberOfLines={1}>
+                        {cleanFacultyName(course.facultyName)}
+                      </Text>
+                      <Text style={{ fontFamily: 'Inter-Regular', fontSize: 13, color: 'rgba(0,0,0,0.5)' }}>
+                        Course Faculty
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 ) : null}
               </View>
@@ -1815,12 +1856,14 @@ const styles = StyleSheet.create({
   titleLight: {
     ...typography.h1,
     color: colors.text,
-    fontWeight: '300',
+    fontFamily: 'Inter-ExtraLight',
+    fontSize: 42,
   },
   titleBold: {
     ...typography.h1,
     color: colors.text,
-    fontWeight: '400',
+    fontFamily: 'Inter-Regular',
+    fontSize: 42,
     marginTop: -6,
   },
   subtitle: {
@@ -1834,7 +1877,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 24,
-    padding: 22,
+    padding: 20,
     gap: 20,
   },
   inlineError: {
@@ -1932,11 +1975,11 @@ const styles = StyleSheet.create({
   studentHero: {
     marginHorizontal: 24,
     marginBottom: 32,
-    borderRadius: 28,
+    borderRadius: 24,
     borderColor: colors.border,
     borderWidth: 1,
     backgroundColor: colors.surface,
-    padding: 22,
+    padding: 20,
   },
   studentTopRow: {
     flexDirection: 'row',
@@ -2166,11 +2209,11 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   classCard: {
-    borderRadius: 22,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: 18,
+    padding: 20,
     gap: 16,
   },
   classCardOptional: {
@@ -2295,11 +2338,11 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   attendanceCard: {
-    borderRadius: 22,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: 18,
+    padding: 20,
     gap: 14,
   },
   attendanceCardLow: {
@@ -2410,11 +2453,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   courseCard: {
-    borderRadius: 22,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: 18,
+    padding: 20,
     gap: 16,
   },
   courseMetaGrid: {
@@ -2509,11 +2552,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    borderRadius: 18,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    padding: 14,
+    padding: 20,
   },
   holidayRowHoliday: {
     borderColor: 'rgba(248, 113, 113, 0.3)',
@@ -2716,9 +2759,9 @@ const styles = StyleSheet.create({
     gap: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#1D1D1D',
+    borderColor: colors.border,
     backgroundColor: colors.background,
-    padding: 14,
+    padding: 16,
   },
   predictorToggle: {
     flexDirection: 'row',
@@ -2834,11 +2877,11 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   monthCard: {
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
-    padding: 16,
+    padding: 20,
     gap: 14,
   },
   monthTitle: {

@@ -12,7 +12,7 @@ import { supabase } from '../../src/utils/supabase';
 import { useFocusEffect } from 'expo-router';
 import { NavigationMenu, HamburgerHeader } from '@/components/NavigationMenu';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+const BACKEND_URL = process.env.EXPO_PUBLIC_ACADEMIA_API_URL || 'http://localhost:3001';
 
 interface GlobalHackathon {
   registration_url: string;
