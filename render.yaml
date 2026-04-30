@@ -14,12 +14,10 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: OLLAMA_URL
+      - key: OPENAI_API_KEY
         sync: false
-      - key: OLLAMA_MODEL
-        sync: false
-      - key: OLLAMA_API_KEY
-        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o
       - key: CRON_SECRET
         sync: false
 
