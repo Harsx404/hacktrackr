@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: hackathon-backend
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: SUPABASE_URL
+        sync: false   # set in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false   # set in Render dashboard
+      - key: OLLAMA_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
+      - key: CRON_SECRET
+        sync: false
