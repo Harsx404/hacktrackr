@@ -2,6 +2,7 @@ services:
   - type: web
     name: hackathon-backend
     runtime: node
+    plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:

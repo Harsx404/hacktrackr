@@ -2,6 +2,7 @@ services:
   - type: web
     name: hackathon-backend
     runtime: node
+    plan: free
     rootDir: hackathon-backend
     buildCommand: npm ci && npm run build
     startCommand: npm start
@@ -24,6 +25,7 @@ services:
   - type: web
     name: academia-backend
     runtime: docker
+    plan: free
     rootDir: academia-backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
